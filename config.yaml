@@ -23,7 +23,7 @@ services:
     entrypoint: ["/usr/bin/tini","--","/dockerstartup/startup.sh"]
   Firefox:
     provider: "docker" # only option for now
-    docker_image: "docker.io/accetto/ubuntu-vnc-xfce-firefox-g3:latest"
+    docker_image: "ghcr.io/mosajjal/gorlami:firefox-latest"
     docker_port: "6901"
     docker_port_type: "novnc"
     docker_port_is_tls: false
@@ -32,9 +32,9 @@ services:
       - "A=B"
   Kali:
     provider: "docker" # only option for now
-    docker_image: "docker.io/kasmweb/kali-rolling-desktop:1.14.0"
+    docker_image: "ghcr.io/mosajjal/gorlami:kali-latest"
     docker_port: "6901"
-    docker_port_type: "kasm" # BUG: not supported YET
+    docker_port_type: "novnc" # BUG: not supported YET
     docker_port_is_tls: true
     entrypoint: ["/dockerstartup/kasm_default_profile.sh", "/dockerstartup/vnc_startup.sh", "/dockerstartup/kasm_startup.sh"]
     env:
