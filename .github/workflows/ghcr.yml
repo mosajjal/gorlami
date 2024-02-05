@@ -55,3 +55,11 @@ jobs:
           file: ./docker/firefox-dockerfile
           push: true
           tags: ghcr.io/mosajjal/gorlami:firefox-latest
+      
+      - name: Build Kali
+        uses: docker/build-push-action@v5
+        with:
+          context: ./docker
+          file: ./docker/kali-dockerfile
+          push: true
+          tags: ghcr.io/mosajjal/gorlami:kali-latest
