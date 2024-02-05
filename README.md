@@ -1,6 +1,7 @@
 ## Gorlami
 
 There's a video about this if you want to learn the correct pronunciation.
+![image](https://github.com/mosajjal/gorlami/assets/10158936/2aa4a308-b01b-4d8f-92f6-825e99695255)
 
 
 `gorlami` is a web interface for requesting a browser sandbox.
