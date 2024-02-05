@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"time"
 
@@ -42,7 +41,7 @@ func readConfig(pathFile string) *Config {
 	// open config file
 	file, err := os.Open(pathFile)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal().Err(err).Msg("failed to open config file")
 	}
 	defer file.Close()
 
@@ -50,7 +49,7 @@ func readConfig(pathFile string) *Config {
 	decoder := yaml.NewDecoder(file)
 	err = decoder.Decode(&config)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal().Err(err).Msg("failed to decode config file")
 	}
 	return &config
 }

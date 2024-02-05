@@ -15,9 +15,10 @@ import (
 	"flag"
 	"fmt"
 	"io/fs"
-	"log"
 	"net"
 	"net/http"
+	"os"
+	"strings"
 	"text/template"
 	"time"
 
@@ -25,6 +26,7 @@ import (
 	"github.com/gofiber/contrib/fiberzerolog"
 	"github.com/gofiber/fiber/v2"
 	"github.com/markbates/goth/providers/azuread"
+	"github.com/rs/zerolog"
 
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
@@ -48,6 +50,9 @@ var kasmVNC embed.FS
 
 //go:embed index.html
 var indexHTML string
+
+var nocolorLog = strings.ToLower(os.Getenv("NO_COLOR")) == "true"
+var logger = zerolog.New(os.Stderr).With().Timestamp().Logger().Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339, NoColor: nocolorLog})
 
 // GetFreePort gets a random open port
 func GetFreePort() (int, error) {
@@ -164,6 +169,7 @@ func main() {
 	// Logging Request ID
 	app.Use(requestid.New())
 	app.Use(fiberzerolog.New(fiberzerolog.Config{
+		Logger: &logger,
 		// For more options, see the Config section
 		Fields: []string{fiberzerolog.FieldRequestID, fiberzerolog.FieldIP,
 			fiberzerolog.FieldIPs, fiberzerolog.FieldLatency, fiberzerolog.FieldStatus,
@@ -250,7 +256,7 @@ func main() {
 	// Get the subdirectory /static from the embedded filesystem
 	noVNCSubFolder, err := fs.Sub(noVNC, "noVNC")
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal().Err(err).Msg("failed to get subfolder")
 	}
 	app.Use("/novnc", filesystem.New(filesystem.Config{
 		Root:   http.FS(noVNCSubFolder),
@@ -260,7 +266,7 @@ func main() {
 	// do the same for KASM
 	kasmVNCSubFolder, err := fs.Sub(kasmVNC, "kasmVNC")
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal().Err(err).Msg("failed to get subfolder")
 	}
 	app.Use("/kasm", filesystem.New(filesystem.Config{
 		Root:   http.FS(kasmVNCSubFolder),
@@ -274,24 +280,24 @@ func main() {
 		// get the container from the map
 		container, ok := RunningContainers[containerID]
 		if !ok {
-			log.Println("container not found")
+			logger.Error().Msg("container not found")
 			return
 		}
 		scheme := "ws"
 		if container.IsEndpointTLS {
 			scheme = "wss"
 		}
-		err := Proxy(c, fmt.Sprintf("%s://%s/websockify", scheme, container.Endpoint))
+		err := WebsocketProxy(c, fmt.Sprintf("%s://%s/websockify", scheme, container.Endpoint))
 		if err != nil {
-			log.Println(err)
+			logger.Error().Err(err).Msg("websocket proxy error")
 		}
 	}))
 
 	if config.Webserver.EnableTLS {
 		// start the server with TLS
-		log.Fatal(app.ListenTLS(fmt.Sprintf(config.Webserver.Listen), config.Webserver.TLSCert, config.Webserver.TLSKey))
+		logger.Fatal().Err(app.ListenTLS(fmt.Sprintf(config.Webserver.Listen), config.Webserver.TLSCert, config.Webserver.TLSKey)).Msg("failed to start server")
 	} else {
 
-		log.Fatal(app.Listen(fmt.Sprintf(config.Webserver.Listen)))
+		logger.Fatal().Err(app.Listen(fmt.Sprintf(config.Webserver.Listen))).Msg("failed to start server")
 	}
 }

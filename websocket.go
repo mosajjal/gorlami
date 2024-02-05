@@ -9,7 +9,7 @@ import (
 	gorilla "github.com/gorilla/websocket"
 )
 
-func Proxy(c *websocket.Conn, endpoint string) error {
+func WebsocketProxy(c *websocket.Conn, endpoint string) error {
 	// connect to upstream
 
 	headers := http.Header{}
@@ -28,18 +28,18 @@ func Proxy(c *websocket.Conn, endpoint string) error {
 	// pipe messages
 	go func() {
 		for {
-			_, msg, err := conn.ReadMessage()
+			t, msg, err := conn.ReadMessage()
 			if err != nil {
 				return
 			}
-			c.WriteMessage(websocket.BinaryMessage, msg)
+			c.WriteMessage(t, msg)
 		}
 	}()
 	for {
-		_, msg, err := c.ReadMessage()
+		t, msg, err := c.ReadMessage()
 		if err != nil {
 			return err
 		}
-		conn.WriteMessage(gorilla.BinaryMessage, msg)
+		conn.WriteMessage(t, msg)
 	}
 }
