@@ -43,6 +43,9 @@ type Container struct {
 //go:embed noVNC/*
 var noVNC embed.FS
 
+//go:embed kasmVNC
+var kasmVNC embed.FS
+
 //go:embed index.html
 var indexHTML string
 
@@ -234,9 +237,10 @@ func main() {
 			return c.Redirect(fmt.Sprintf("/novnc/vnc.html?path=%s&password=headless", websockifyURI), http.StatusMovedPermanently)
 		}
 		if container.EndpointType == "kasm" {
-			// set up a reverse proxy to the container
+			websockifyURI := fmt.Sprintf("view/%s/websockify", container.ID)
+			// 301 the user to NoVNC after waiting 5 seconds. TODO: try to do proper healthcheck
 			time.Sleep(5 * time.Second)
-			return c.Redirect(fmt.Sprintf("/kasm/%s", container.ID), http.StatusMovedPermanently)
+			return c.Redirect(fmt.Sprintf("/kasm/index.html?path=%s", websockifyURI), http.StatusMovedPermanently)
 		}
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": "invalid endpoint type",
@@ -244,12 +248,22 @@ func main() {
 	})
 
 	// Get the subdirectory /static from the embedded filesystem
-	subFS, err := fs.Sub(noVNC, "noVNC")
+	noVNCSubFolder, err := fs.Sub(noVNC, "noVNC")
 	if err != nil {
 		log.Fatal(err)
 	}
 	app.Use("/novnc", filesystem.New(filesystem.Config{
-		Root:   http.FS(subFS),
+		Root:   http.FS(noVNCSubFolder),
+		Browse: false,
+	}))
+
+	// do the same for KASM
+	kasmVNCSubFolder, err := fs.Sub(kasmVNC, "kasmVNC")
+	if err != nil {
+		log.Fatal(err)
+	}
+	app.Use("/kasm", filesystem.New(filesystem.Config{
+		Root:   http.FS(kasmVNCSubFolder),
 		Browse: false,
 	}))
 
