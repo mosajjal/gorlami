@@ -36,6 +36,14 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/mosajjal/gorlami:core-latest
+
+      - name: Build Chrome
+        uses: docker/build-push-action@v5
+        with:
+          context: .
           file: ./docker/chrome-dockerfile
           push: true
           tags: ghcr.io/mosajjal/gorlami:chrome-latest

@@ -1,0 +1,5 @@
+FROM docker.io/kasmweb/kali-rolling-desktop:1.14.0
+
+COPY kali-kasmvnc.yaml /etc/kasmvnc/kasmvnc.yaml
+
+ENTRYPOINT ["/dockerstartup/kasm_default_profile.sh", "/dockerstartup/vnc_startup.sh", "/dockerstartup/kasm_startup.sh"]
