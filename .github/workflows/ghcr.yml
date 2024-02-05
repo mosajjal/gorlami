@@ -38,7 +38,7 @@ jobs:
           context: .
           file: ./docker/chrome-dockerfile
           push: true
-          tags: gorlami/chrome:latest
+          tags: ghcr.io/mosajjal/gorlami:chrome-latest
 
       - name: Build Firefox
         uses: docker/build-push-action@v5
@@ -46,4 +46,4 @@ jobs:
           context: .
           file: ./docker/firefox-dockerfile
           push: true
-          tags: gorlami/firefox:latest
+          tags: ghcr.io/mosajjal/gorlami:firefox-latest
