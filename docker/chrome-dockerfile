@@ -1,0 +1,3 @@
+FROM accetto/ubuntu-vnc-xfce-chromium-g3:latest
+
+ENTRYPOINT ["/usr/bin/tini","--","/dockerstartup/startup.sh"]

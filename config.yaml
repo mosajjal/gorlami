@@ -1,15 +1,3 @@
-## Gorlami
-
-There's a video about this if you want to learn the correct pronunciation.
-
-
-`gorlami` is a web interface for requesting a browser sandbox.
-the application (optionally) authenticates with oAtuh2, then presents a form to the user to choose a session length. it then creates a headless container with the browser, using `accetto/ubuntu-vnc-xfce-chromium-g3:latest`.
-
-
-## Configuration
-
-```yaml
 webserver:
   listen: "0.0.0.0:3000"
   enable_tls: false
@@ -51,14 +39,3 @@ services:
     entrypoint: ["/dockerstartup/kasm_default_profile.sh", "/dockerstartup/vnc_startup.sh", "/dockerstartup/kasm_startup.sh"]
     env:
       - "VNC_PW=headless"
-```
-
-## How to run
-
-```
-# build the binary using go build (no need for CGO)
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags='-s -w' .
-# run the binary
-./gorlami -config config.yaml
-```
-
