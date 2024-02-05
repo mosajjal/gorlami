@@ -16,8 +16,7 @@
                         <option value="{{.}}">{{.}}</option>
                     {{end}}
                 </select>
-            </fieldset>
-            <button name="submit" type="submit" id="contact-submit" data-submit="...Sending" onclick="setTimeout(function() { this.disabled = true; }, 5);">Go to VNC</button>
+            <button name="submit" type="submit" id="contact-submit" data-submit="...Sending" onclick="this.innerHTML = 'Loading...'; this.style.backgroundColor = 'grey'; setTimeout(function() { this.disabled = true; }, 5);">Go to VNC</button>
             </fieldset>
         </form>
     </div>

@@ -16436,7 +16436,9 @@ var rfb_RFB = /*#__PURE__*/function (_EventTargetMixin) {
     _this._rfbCredentials = options.credentials || {};
     _this._shared = 'shared' in options ? !!options.shared : true;
     _this._repeaterID = options.repeaterID || '';
-    _this._wsProtocols = options.wsProtocols || ['binary']; // Internal state
+    // ALI CHANGED THIS FROM:
+    // _this._wsProtocols = options.wsProtocols || ['binary']; // Internal state
+    _this._wsProtocols = options.wsProtocols || []; // Internal state
 
     _this._rfbConnectionState = '';
     _this._rfbInitState = '';
@@ -21673,6 +21675,9 @@ var UI = {
     document.getElementById("noVNC_status").addEventListener('click', UI.hideStatus);
     UI.openControlbar(); // 
 
+    // ALI ADDED THIS. GO HOME FUNCTION
+    document.getElementById("noVNC_home_button").addEventListener('click', UI.go_home);
+
     UI.updateVisualState('init');
     document.documentElement.classList.remove("noVNC_loading");
     var autoconnect = getConfigVar('autoconnect', true);
@@ -22258,6 +22263,10 @@ var UI = {
   hideStatus: function hideStatus() {
     clearTimeout(UI.statusTimeout);
     document.getElementById('noVNC_status').classList.remove("noVNC_open");
+  },
+  // ALI ADDED THIS. GO HOME
+  go_home: function go_home() {
+      window.location.href = "/";
   },
   activateControlbar: function activateControlbar(event) {
     clearTimeout(UI.idleControlbarTimeout); // We manipulate the anchor instead of the actual control

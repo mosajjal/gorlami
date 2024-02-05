@@ -158,7 +158,6 @@ func keys[K comparable, V any](m map[K]V) []K {
 }
 
 func main() {
-
 	// flag to read the config file path
 	configPath := flag.String("config", "config.yaml", "path to config file")
 	flag.Parse()
@@ -235,17 +234,13 @@ func main() {
 		}
 		// add to running containers
 		RunningContainers[container.ID] = container
+		websockifyURI := fmt.Sprintf("view/%s/websockify", container.ID)
+		time.Sleep(time.Second * 5) //TODO: how do we make this shorter?
 
 		if container.EndpointType == "novnc" {
-			websockifyURI := fmt.Sprintf("view/%s/websockify", container.ID)
-			// 301 the user to NoVNC after waiting 5 seconds. TODO: try to do proper healthcheck
-			time.Sleep(5 * time.Second)
 			return c.Redirect(fmt.Sprintf("/novnc/vnc.html?path=%s&password=headless", websockifyURI), http.StatusMovedPermanently)
 		}
 		if container.EndpointType == "kasm" {
-			websockifyURI := fmt.Sprintf("view/%s/websockify", container.ID)
-			// 301 the user to NoVNC after waiting 5 seconds. TODO: try to do proper healthcheck
-			time.Sleep(5 * time.Second)
 			return c.Redirect(fmt.Sprintf("/kasm/index.html?path=%s", websockifyURI), http.StatusMovedPermanently)
 		}
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
@@ -274,24 +269,29 @@ func main() {
 	}))
 
 	// register the viewer handler with the sha256 of the container
-	app.Get("/view/:id/websockify", websocket.New(func(c *websocket.Conn) {
-		// get the container ID from the request
-		containerID := c.Params("id")
-		// get the container from the map
-		container, ok := RunningContainers[containerID]
-		if !ok {
-			logger.Error().Msg("container not found")
-			return
+	app.Get("/view/:id/websockify", func(c *fiber.Ctx) error {
+		if !websocket.IsWebSocketUpgrade(c) {
+			return fiber.ErrUpgradeRequired
 		}
-		scheme := "ws"
-		if container.IsEndpointTLS {
-			scheme = "wss"
-		}
-		err := WebsocketProxy(c, fmt.Sprintf("%s://%s/websockify", scheme, container.Endpoint))
-		if err != nil {
-			logger.Error().Err(err).Msg("websocket proxy error")
-		}
-	}))
+		return websocket.New(func(c *websocket.Conn) {
+			// get the container ID from the request
+			containerID := c.Params("id")
+			// get the container from the map
+			container, ok := RunningContainers[containerID]
+			if !ok {
+				logger.Error().Msg("container not found")
+				return
+			}
+			scheme := "ws"
+			if container.IsEndpointTLS {
+				scheme = "wss"
+			}
+
+			if err := WebsocketProxy(c, fmt.Sprintf("%s://%s/websockify", scheme, container.Endpoint)); err != nil {
+				logger.Error().Err(err).Msg("websocket proxy error")
+			}
+		})(c)
+	})
 
 	if config.Webserver.EnableTLS {
 		// start the server with TLS
