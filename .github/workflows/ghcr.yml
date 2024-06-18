@@ -33,7 +33,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build Chrome
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
@@ -41,7 +41,7 @@ jobs:
           tags: ghcr.io/mosajjal/gorlami:core-latest
 
       - name: Build Chrome
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/chrome-dockerfile
@@ -49,7 +49,7 @@ jobs:
           tags: ghcr.io/mosajjal/gorlami:chrome-latest
 
       - name: Build Firefox
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/firefox-dockerfile
@@ -57,7 +57,7 @@ jobs:
           tags: ghcr.io/mosajjal/gorlami:firefox-latest
       
       - name: Build Kali
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./docker
           file: ./docker/kali-dockerfile
